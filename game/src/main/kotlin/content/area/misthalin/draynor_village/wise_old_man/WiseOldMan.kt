@@ -193,6 +193,7 @@ class WiseOldMan : Script {
             choice {
                 option<Happy>("Could you check my bank for junk, please?") {
                     npc<Neutral>("Certainly, but I should warn you that I don't know about all items.")
+                    set("klept_old_man_ia_task", true)
                     // TODO add junk search
                     npc<Neutral>("There doesn't seem to be any junk in your bank at all.")
                 }
