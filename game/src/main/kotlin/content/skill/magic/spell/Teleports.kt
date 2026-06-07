@@ -56,6 +56,12 @@ class Teleports : Script {
             }
         }
 
+        teleportLand("modern") {
+            if (tile in Areas["lumbridge_teleport"]) {
+                set("ease_of_access_task", true)
+            }
+        }
+
         teleportTakeOff("lumbridge_home_teleport") {
             val seconds = remaining("home_teleport_timeout", epochSeconds())
             if (seconds > 0) {

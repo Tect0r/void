@@ -44,6 +44,7 @@ class DukeHoracio : Script {
                 item("talisman_rune_mysteries", "The Duke hands you the talisman.")
             }
             findMoney()
+            antiDragonShield()
         }
     }
 
@@ -59,6 +60,7 @@ class DukeHoracio : Script {
                 startQuest()
             }
             findMoney()
+            antiDragonShield()
         }
     }
 
@@ -68,11 +70,26 @@ class DukeHoracio : Script {
                 npc<Idle>("The only job I had was the delivery of that talisman, so I'm afraid not.")
             }
             findMoney()
+            antiDragonShield()
         }
     }
 
     fun ChoiceOption.findMoney(): Unit = option<Quiz>("Where can I find money?") {
         npc<Idle>("I've heard that the blacksmiths are prosperous amongst the peasantry. Maybe you could try your hand at that?")
+    }
+
+    fun ChoiceOption.antiDragonShield(): Unit = option<Quiz>("Can I have an anti-dragon shield?") {
+        if (quest("dragon_slayer") != "completed") {
+            npc<Idle>("Those shields are reserved for adventurers brave enough to have slain the dragon Elvarg. Come back once you've proven yourself.")
+            return@option
+        }
+        if (inventory.isFull()) {
+            item("anti_dragon_shield", "The Duke tries to hand you a shield, but you don't have enough inventory space.")
+            return@option
+        }
+        inventory.add("anti_dragon_shield")
+        set("always_be_prepared_task", true)
+        item("anti_dragon_shield", "The Duke hands you an anti-dragon shield.")
     }
 
     suspend fun Player.startQuest() {

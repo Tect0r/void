@@ -55,7 +55,7 @@ class BeefyBill : Script {
 
         itemOnNPCOperate(npc = "beefy_bill") {
             when (it.item.id) {
-                "cowhide", "pot_of_flour", "beef" -> transport(it.item.id)
+                "cowhide", "pot_of_flour", "raw_beef" -> transport(it.item.id)
                 else -> npc<Neutral>("Sorry, I don't transport that sort of thing.")
             }
         }
@@ -77,7 +77,10 @@ class BeefyBill : Script {
                 }
                 when (inventory.transaction.error) {
                     is TransactionError.Full -> message("You don't have enough bank space to store that.")
-                    TransactionError.None -> npc<Happy>("Pleasure doing business with ya, mate!")
+                    TransactionError.None -> {
+                        set("wheres_the_beef_task", true)
+                        npc<Happy>("Pleasure doing business with ya, mate!")
+                    }
                     else -> {}
                 }
             }
