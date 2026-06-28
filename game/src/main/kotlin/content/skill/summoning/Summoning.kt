@@ -1,6 +1,10 @@
 package content.skill.summoning
 
 import content.entity.player.dialogue.type.choice
+import content.skill.summoning.pet.callPet
+import content.skill.summoning.pet.dismissPet
+import content.skill.summoning.pet.pet
+import content.skill.summoning.pet.updatePetInterface
 import net.pearx.kasechange.toLowerSpaceCase
 import org.rsmod.game.pathfinder.StepValidator
 import world.gregs.voidps.cache.definition.data.NPCDefinition
@@ -16,6 +20,7 @@ import world.gregs.voidps.engine.entity.character.move.tele
 import world.gregs.voidps.engine.entity.character.npc.NPC
 import world.gregs.voidps.engine.entity.character.npc.NPCs
 import world.gregs.voidps.engine.entity.character.player.Player
+import world.gregs.voidps.engine.entity.character.player.Players
 import world.gregs.voidps.engine.entity.character.player.skill.Skill
 import world.gregs.voidps.engine.entity.character.player.skill.exp.exp
 import world.gregs.voidps.engine.entity.character.player.skill.level.Level.has
@@ -51,7 +56,7 @@ var Player.follower: NPC?
  * familiar timer
  */
 fun Player.summonFamiliar(familiar: NPCDefinition, restart: Boolean) {
-    if (follower != null) {
+    if (follower != null || pet != null) {
         message("You already have a follower.")
         return
     }
@@ -63,6 +68,7 @@ fun Player.summonFamiliar(familiar: NPCDefinition, restart: Boolean) {
     familiarNpc.mode = Follow(familiarNpc, this)
     queue("summon_familiar", 2) {
         follower = familiarNpc
+        familiarNpc["owner_index"] = index
         familiarNpc.gfx("summon_familiar_size_${familiarNpc.size}")
         updateFamiliarInterface()
         if (!restart) {
@@ -75,10 +81,14 @@ fun Player.summonFamiliar(familiar: NPCDefinition, restart: Boolean) {
  * Dismisses the familiar following the player and resets the summoning orb and varbits back to their default
  * states. Also stops the familiar timer.
  */
-fun Player.dismissFamiliar() {
-    NPCs.remove(follower)
+fun Player.dismissFamiliar(removeNpc: Boolean = true) {
+    dropBeastOfBurdenItems()
+    if (removeNpc) {
+        NPCs.remove(follower)
+    }
     follower = null
     interfaces.close("familiar_details")
+    interfaces.close("beast_of_burden")
     sendScript("reset_summoning_orb")
 
     // Need to wait for the above sendScript to reach the client before resetting
@@ -114,7 +124,11 @@ fun Player.openFollowerLeftClickOptions() {
  * Confirms the selected option in the follower_left_click_options interface and sets the var.
  */
 fun Player.confirmFollowerLeftClickOptions() {
-    set("summoning_orb_left_click_option", get("summoning_menu_left_click_option", -1))
+    // Default falls back to 0 (follower_details) because `PlayerVariables.set`
+    // clears any persistent variable assigned its default value (`int` -> 0),
+    // so picking the first radio leaves `summoning_menu_left_click_option`
+    // empty rather than literally 0.
+    set("summoning_orb_left_click_option", get("summoning_menu_left_click_option", 0))
     interfaces.close("follower_left_click_options")
 }
 
@@ -142,6 +156,22 @@ fun Player.callFollower() {
     follower.tele(target, clearMode = false)
     follower.watch(this)
     follower.gfx("summon_familiar_size_${follower.size}")
+    if (follower.mode !is Follow) {
+        follower.mode = Follow(follower, this)
+    }
+}
+
+/**
+ * Restores summoning points at an obelisk, mirroring prayer altar behaviour.
+ */
+fun Player.renewSummoningPoints() {
+    if (levels.getOffset(Skill.Summoning) >= 0) {
+        message("You already have full summoning points.")
+    } else {
+        levels.set(Skill.Summoning, levels.getMax(Skill.Summoning))
+        anim("summoning_infuse")
+        message("You renew your summoning points at the obelisk.")
+    }
 }
 
 /**
@@ -173,6 +203,10 @@ fun Player.renewFamiliar() {
 class Summoning : Script {
 
     init {
+        objectOperate("Renew-points") {
+            renewSummoningPoints()
+        }
+
         itemOption("Summon", "*_pouch") { option ->
             val familiarLevel = EnumDefinitions.get("summoning_pouch_levels").int(option.item.def.id)
             val familiarId = EnumDefinitions.get("summoning_familiar_ids").int(option.item.def.id)
@@ -180,6 +214,10 @@ class Summoning : Script {
             val familiar = NPCDefinitions.get(familiarId)
             if (!has(Skill.Summoning, familiarLevel)) {
                 message("You are not high enough level to use this pouch.")
+                return@itemOption
+            }
+            if (follower != null || pet != null) {
+                message("You already have a follower.")
                 return@itemOption
             }
             summonFamiliar(familiar, false)
@@ -212,7 +250,11 @@ class Summoning : Script {
         }
 
         interfaceOption("Dismiss", id = "summoning_orb:*dismiss_follower") {
-            dismissFamiliar()
+            when {
+                follower != null -> dismissFamiliar()
+                pet != null -> dismissPet()
+                else -> message("You don't have a follower.")
+            }
         }
 
         interfaceOption("Renew Familiar", id = "summoning_orb:*renew_familiar") {
@@ -220,16 +262,32 @@ class Summoning : Script {
         }
 
         interfaceOption("*", "familiar_details:dismiss") { option ->
-            when (option.option) {
-                "Dismiss Familiar" -> {
-                    choice("Are you sure you want to dismiss your familiar?") {
-                        option("Yes.") {
-                            dismissFamiliar()
-                        }
-                        option("No.")
+            if (pet != null) {
+                choice("Are you sure you want to release your pet?") {
+                    option("Yes.") {
+                        dismissPet()
                     }
+                    option("No.")
+                }
+                return@interfaceOption
+            }
+            when (option.option) {
+                "Dismiss Familiar" -> choice("Are you sure you want to dismiss your familiar?") {
+                    option("Yes.") {
+                        dismissFamiliar()
+                    }
+                    option("No.")
                 }
                 "Dismiss Now" -> dismissFamiliar()
+            }
+        }
+
+        interfaceOption("*", "pet_details:dismiss") {
+            choice("Are you sure you want to release your pet?") {
+                option("Yes.") {
+                    dismissPet()
+                }
+                option("No.")
             }
         }
 
@@ -237,12 +295,28 @@ class Summoning : Script {
             renewFamiliar()
         }
 
-        interfaceOption("Call Follower", "*_details:call") {
-            callFollower()
+        interfaceOption("*", "familiar_details:call") {
+            if (pet != null) callPet() else callFollower()
+        }
+
+        interfaceOption("*", "pet_details:call") {
+            callPet()
         }
 
         interfaceOption("Call Follower", "summoning_orb:*call_follower") {
-            callFollower()
+            when {
+                follower != null -> callFollower()
+                pet != null -> callPet()
+                else -> message("You don't have a follower.")
+            }
+        }
+
+        interfaceOption("Follower Details", "summoning_orb:leftclick_follower_details") {
+            when {
+                follower != null -> updateFamiliarInterface()
+                pet != null -> updatePetInterface()
+                else -> message("You don't have a follower.")
+            }
         }
 
         playerSpawn {
@@ -260,8 +334,15 @@ class Summoning : Script {
             summonFamiliar(familiarDef, true)
         }
 
-        interfaceOption("Take BoB", "familiar_details:take_bob_items") {
-            message("<dark_green>Not currently implemented.")
+        npcDeath("*_familiar") { death ->
+            death.respawn = false
+            death.dropItems = false
+            val owner = Players.indexed(this["owner_index", -1]) ?: return@npcDeath
+            if (owner.follower?.index == index) {
+                // Familiar slain in combat: drop its stored items and dismiss it.
+                // The death flow despawns the NPC, so don't remove it again here.
+                owner.dismissFamiliar(removeNpc = false)
+            }
         }
     }
 }

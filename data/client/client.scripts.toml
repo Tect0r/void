@@ -1,6 +1,9 @@
 [model_swapper]
 id = 67
 
+[refresh_bonus_experience]
+id = 776
+
 [is_quest_item]
 id = 927
 
@@ -42,6 +45,9 @@ id = 695
 
 [update_bank_slots]
 id = 1465
+
+[bank_search_arm]
+id = 1472
 
 [quest_journal_refresh]
 id = 2169

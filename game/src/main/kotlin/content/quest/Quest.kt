@@ -9,6 +9,7 @@ import world.gregs.voidps.engine.entity.item.Item
 
 val quests = setOf(
     // free
+    "blood_pact",
     "unstable_foundations",
     "cooks_assistant",
     "demon_slayer",
@@ -27,6 +28,7 @@ val quests = setOf(
     "priest_in_peril",
     "lost_city",
     "tears_of_guthix",
+    "zogre_flesh_eaters",
     // mini-quests
     "enter_the_abyss",
 )
