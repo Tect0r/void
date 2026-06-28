@@ -53,6 +53,8 @@ class Thessalia : Script {
         }
 
         interfaceOpened("thessalias_makeovers") { id ->
+            // Strike a Pose - Have Thessalia show you what outfits you can wear.
+            set("strike_a_pose_task", true)
             interfaces.sendText(id, "confirm_text", "Change")
             interfaceOptions.unlockAll(id, "styles", 0 until 100)
             interfaceOptions.unlockAll(id, "colours", 0 until EnumDefinitions.get("colour_top").length * 2)

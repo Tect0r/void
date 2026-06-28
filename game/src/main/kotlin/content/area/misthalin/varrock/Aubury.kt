@@ -43,6 +43,8 @@ class Aubury : Script {
         }
 
         npcOperate("Teleport", "aubury") { (target) ->
+            // Essential Facilitator - Have Aubury teleport you to the essence mine.
+            set("essential_facilitator_task", true)
             EssenceMine.teleport(target, this)
         }
     }
@@ -57,6 +59,8 @@ class Aubury : Script {
 
     fun ChoiceOption.teleport(npc: NPC): Unit = option("Can you teleport me to the Rune Essence?") {
         npc<Idle>("Of course. By the way, if you end up making any runes from the essence you mine, I'll happily buy them from you.")
+        // Essential Facilitator - Have Aubury teleport you to the essence mine.
+        set("essential_facilitator_task", true)
         EssenceMine.teleport(npc, this)
     }
 

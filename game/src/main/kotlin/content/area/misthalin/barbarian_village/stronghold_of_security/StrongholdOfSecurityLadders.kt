@@ -37,6 +37,10 @@ class StrongholdOfSecurityLadders(val teleports: ObjectTeleports) : Script {
 
         objTeleportTakeOff("Climb-down", "stronghold_war_ladder_down,stronghold_famine_ladder_down") { target, option ->
             if (get("warning_stronghold_of_security_ladders", 0) == 7) {
+                if (target.id == "stronghold_war_ladder_down") {
+                    // Making Learning Fun! - Enter the second level of the Stronghold of Security.
+                    set("making_learning_fun_task", true)
+                }
                 return@objTeleportTakeOff Teleport.CONTINUE
             }
             queue("stronghold_warning") {
@@ -47,6 +51,10 @@ class StrongholdOfSecurityLadders(val teleports: ObjectTeleports) : Script {
                     clear("stronghold_safe_space")
                     val definition = teleports.get(option)[target.tile.id]!!
                     teleports.teleportContinue(this, definition, target)
+                    if (target.id == "stronghold_war_ladder_down") {
+                        // Making Learning Fun! - Enter the second level of the Stronghold of Security.
+                        set("making_learning_fun_task", true)
+                    }
                 }
             }
             Teleport.CANCEL
