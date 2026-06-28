@@ -4,20 +4,45 @@ import content.skill.prayer.praying
 import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.data.definition.Areas
 import world.gregs.voidps.engine.entity.character.npc.NPC
+import world.gregs.voidps.engine.entity.obj.GameObjects
+import world.gregs.voidps.engine.entity.obj.ObjectShape
 import world.gregs.voidps.engine.inv.*
+import world.gregs.voidps.type.Tile
 
 /**
  * Triggers for the Lumbridge/Draynor **Hard** achievement task set.
- *
- * Two of the seven hard tasks are not wired up because the map objects/areas
- * they require do not exist (the same gap that defers their Medium siblings
- * `steel_justice` and `willow_the_wisp_of_smoke`):
- * - `a_body_in_the_sewers` needs the anvil in the sewers beneath Draynor.
- * - `are_yew_as_fired_up_as_i_am` needs the Lumbridge Castle gatehouse roof.
  */
 class LumbridgeHardTasks : Script {
 
     init {
+        // A Body in the Sewers: smith a mithril platebody on the anvil beneath the Draynor jail.
+        itemAdded("mithril_platebody", inventory = "inventory") {
+            if (softTimers.contains("smithing") && tile in Areas["draynor_sewer_anvil"]) {
+                set("a_body_in_the_sewers_task", true)
+            }
+        }
+
+        // Are You As Fired Up As I Am?: burn yew logs atop the Lumbridge Castle gatehouse roof.
+        // Mirrors the `log_a_rhythm` firemaking pattern: stash the fire tile when the logs leave
+        // the inventory, then confirm a fire object stands on that tile when the timer stops.
+        itemRemoved("yew_logs", inventory = "inventory") {
+            if (!get("are_yew_as_fired_up_as_i_am_task", false)) {
+                set("burnt_yew_log", true)
+                set("yew_fire_tile", tile)
+            }
+        }
+
+        timerStop("firemaking") {
+            val burnt: Boolean = remove("burnt_yew_log") ?: return@timerStop
+            val fireTile: Tile = remove("yew_fire_tile") ?: return@timerStop
+            if (burnt && fireTile in Areas["lumbridge_castle_gatehouse_roof"]) {
+                val fire = GameObjects.getShape(fireTile, ObjectShape.CENTRE_PIECE_STRAIGHT)
+                if (fire != null && fire.id.startsWith("fire_")) {
+                    set("are_yew_as_fired_up_as_i_am_task", true)
+                }
+            }
+        }
+
         // Building Up Strength: enchant a ruby amulet into an amulet of strength within Lumbridge.
         itemAdded("amulet_of_strength", inventory = "inventory") {
             if (tile in Areas["lumbridge"]) {

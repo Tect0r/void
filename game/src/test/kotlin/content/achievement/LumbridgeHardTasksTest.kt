@@ -86,6 +86,37 @@ internal class LumbridgeHardTasksTest : WorldTest() {
     }
 
     @Test
+    fun `A Body in the Sewers`() {
+        val player = createPlayer(Tile(3113, 9689))
+        player.levels.set(Skill.Smithing, 99)
+        player.inventory.add("hammer")
+        player.inventory.add("mithril_bar", 5)
+        val anvil = GameObjects.find(Tile(3112, 9689), "anvil")
+
+        player.itemOnObject(anvil, 1)
+        tick()
+
+        player.interfaceOption("smithing", "platebody_1", "Make 1 Platebody", optionIndex = 0)
+        tickIf(limit = 20) { !player.inventory.contains("mithril_platebody") }
+
+        assertTrue(player.inventory.contains("mithril_platebody"))
+        assertTrue(player["a_body_in_the_sewers_task", false])
+    }
+
+    @Test
+    fun `Are You As Fired Up As I Am`() {
+        val player = createPlayer(Tile(3229, 3218, 2))
+        player.levels.set(Skill.Firemaking, 99)
+        player.inventory.add("tinderbox")
+        player.inventory.add("yew_logs", 5)
+
+        player.itemOnItem(0, 1)
+        tickIf(limit = 20) { !player["are_yew_as_fired_up_as_i_am_task", false] }
+
+        assertTrue(player["are_yew_as_fired_up_as_i_am_task", false])
+    }
+
+    @Test
     fun `Gods Give Me Strength`() {
         val player = createPlayer(Tile(3244, 3207))
         player.addVarbit("activated_prayers", "mystic_might")
