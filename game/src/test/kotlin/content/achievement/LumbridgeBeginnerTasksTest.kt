@@ -2,6 +2,7 @@ package content.achievement
 
 import FakeRandom
 import WorldTest
+import continueDialogue
 import dialogueContinue
 import dialogueOption
 import interfaceOnItem
@@ -1114,6 +1115,36 @@ internal class LumbridgeBeginnerTasksTest : WorldTest() {
 
         assertTrue(player.inventory.contains("soft_clay"))
         assertFalse(player["just_add_water_task", false])
+    }
+
+    @Test
+    fun `Very Potter`() {
+        val player = createPlayer(Tile(3090, 3283))
+        player.inventory.add("soft_clay")
+        val wheel = createObject("potters_wheel", Tile(3091, 3283))
+
+        player.itemOnObject(wheel, 0)
+        tick(5)
+        player.continueDialogue("dialogue_skill_creation", "choice1")
+        tick(3)
+
+        assertTrue(player.inventory.contains("unfired_pot"))
+        assertTrue(player["very_potter_task", false])
+    }
+
+    @Test
+    fun `Very Potter outside the potter's house`() {
+        val player = createPlayer(Tile(3090, 3250))
+        player.inventory.add("soft_clay")
+        val wheel = createObject("potters_wheel", Tile(3091, 3250))
+
+        player.itemOnObject(wheel, 0)
+        tick(5)
+        player.continueDialogue("dialogue_skill_creation", "choice1")
+        tick(3)
+
+        assertTrue(player.inventory.contains("unfired_pot"))
+        assertFalse(player["very_potter_task", false])
     }
 
     @Test

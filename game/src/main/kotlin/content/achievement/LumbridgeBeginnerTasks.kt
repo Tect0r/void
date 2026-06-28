@@ -365,6 +365,12 @@ class LumbridgeBeginnerTasks(
             }
         }
 
+        itemAdded("unfired_pot", inventory = "inventory") {
+            if (softTimers.contains("pottery") && tile in Areas["draynor_potter_house"]) {
+                set("very_potter_task", true)
+            }
+        }
+
         maxLevelChanged(Skill.Mining) { _, from, to ->
             if (from < 5 && to >= 5) {
                 set("hack_and_smash_task", true)
