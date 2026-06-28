@@ -5,6 +5,7 @@ import WorldTest
 import dialogueContinue
 import dialogueOption
 import interfaceOption
+import itemOnItem
 import itemOnNpc
 import itemOnObject
 import npcOption
@@ -137,6 +138,51 @@ internal class LumbridgeMediumTasksTest : WorldTest() {
 
         assertTrue(player["always_be_prepared_task", false])
         assertTrue(player.inventory.contains("anti_dragon_shield"))
+    }
+
+    @Test
+    fun `Weeping Willow`() {
+        val player = createPlayer(Tile(3233, 3230))
+        player.levels.set(Skill.Woodcutting, 100)
+        val willow = createObject("willow_2", Tile(3234, 3230))
+        player.inventory.add("rune_hatchet")
+
+        player.objectOption(willow, "Chop down")
+        tickIf { !player.inventory.contains("willow_logs") }
+
+        assertTrue(player.inventory.contains("willow_logs"))
+        assertTrue(player["weeping_willow_task", false])
+    }
+
+    @Test
+    fun `Steel Justice`() {
+        val player = createPlayer(Tile(3111, 9689))
+        player.levels.set(Skill.Smithing, 99)
+        player.inventory.add("hammer")
+        player.inventory.add("steel_bar", 2)
+        val anvil = createObject("anvil", Tile(3112, 9689))
+
+        player.itemOnObject(anvil, 1)
+        tick()
+        player.interfaceOption("smithing", "longsword_1", "Make 1 Longsword", optionIndex = 0)
+        tick(5)
+
+        assertTrue(player.inventory.contains("steel_longsword"))
+        assertTrue(player["steel_justice_task", false])
+    }
+
+    @Test
+    fun `Willow the Wisp of Smoke`() {
+        val start = Tile(3228, 3218, 2)
+        val player = createPlayer(start)
+        player.levels.set(Skill.Firemaking, 100)
+        player.inventory.add("tinderbox")
+        player.inventory.add("willow_logs", 5)
+
+        player.itemOnItem(0, 1) // tinderbox on willow logs
+        tickIf { player.tile == start }
+
+        assertTrue(player["willow_the_wisp_of_smoke_task", false])
     }
 
     @Test

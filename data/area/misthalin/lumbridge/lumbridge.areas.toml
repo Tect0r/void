@@ -42,6 +42,19 @@ y = [3212, 3225]
 level = 2
 tags = ["high"]
 
+# Walkable platform on top of the castle gatehouse (reached by the two ladders
+# id 36770 at 3229,3213 and 3229,3224). Used by the firemaking achievements.
+[lumbridge_castle_gatehouse_roof]
+x = [3227, 3230]
+y = [3212, 3225]
+level = 2
+
+# The lone willow tree (willow_2, id 5552 at 3234,3230) east of the castle, across the river.
+[lumbridge_castle_willow]
+x = [3232, 3236]
+y = [3228, 3232]
+level = 0
+
 [lumbridge_swamp_east_copper_mine]
 x = [3227, 3231]
 y = [3143, 3149]

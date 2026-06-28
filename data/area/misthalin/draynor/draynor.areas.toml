@@ -55,3 +55,9 @@ y = [3246, 3257, 3257, 3255, 3255, 3246]
 [draynor_potter_house]
 x = [3085, 3097]
 y = [3278, 3287]
+
+# Anvil (id 2783 at 3112,9689) in the sewers beneath the Draynor jail.
+[draynor_sewer_anvil]
+x = [3110, 3114]
+y = [9687, 9691]
+level = 0

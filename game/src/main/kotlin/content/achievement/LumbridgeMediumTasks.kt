@@ -2,7 +2,9 @@ package content.achievement
 
 import world.gregs.voidps.engine.Script
 import world.gregs.voidps.engine.data.definition.Areas
+import world.gregs.voidps.engine.entity.obj.GameObjects
 import world.gregs.voidps.engine.inv.*
+import world.gregs.voidps.type.Tile
 
 /**
  * Triggers for the Lumbridge/Draynor **Medium** achievement task set.
@@ -11,11 +13,6 @@ import world.gregs.voidps.engine.inv.*
  * - `wheres_the_beef` -> [content.area.misthalin.lumbridge.BeefyBill]
  * - `always_be_prepared` -> [content.area.misthalin.lumbridge.castle.DukeHoracio]
  * - `ease_of_access` -> [content.skill.magic.spell.Teleports]
- *
- * The three remaining mediums (`steel_justice`, `weeping_willow`,
- * `willow_the_wisp_of_smoke`) are not yet wired up: they depend on map objects
- * (the Draynor sewer anvil, the willows east of the castle, and the gatehouse
- * roof) for which no area/object is currently defined.
  */
 class LumbridgeMediumTasks : Script {
 
@@ -53,6 +50,41 @@ class LumbridgeMediumTasks : Script {
         itemAdded("raw_salmon", inventory = "inventory") {
             if (softTimers.contains("fishing") && tile in Areas["lumbridge_river_fishing_area"]) {
                 set("lovely_with_a_squeeze_of_lemon_task", true)
+            }
+        }
+
+        // Cut down the willow (willow_2, id 5552) east of Lumbridge Castle, across the river.
+        itemAdded("willow_logs", inventory = "inventory") {
+            if (softTimers.contains("woodcutting") && tile in Areas["lumbridge_castle_willow"]) {
+                set("weeping_willow_task", true)
+            }
+        }
+
+        // Smith a steel longsword on the anvil in the Draynor jail sewers.
+        itemAdded("steel_longsword", inventory = "inventory") {
+            if (softTimers.contains("smithing") && tile in Areas["draynor_sewer_anvil"]) {
+                set("steel_justice_task", true)
+            }
+        }
+
+        // Light a willow log fire on top of the Lumbridge Castle gatehouse (level 2).
+        // The fire colour (orange) is shared between log types, so the willow log is
+        // identified by listening to its inventory removal: the log is dropped to the
+        // floor at the player's tile right before lighting. That tile is the eventual
+        // fire tile; on firemaking completion we confirm a fire spawned there.
+        itemRemoved("willow_logs", inventory = "inventory") {
+            if (tile in Areas["lumbridge_castle_gatehouse_roof"]) {
+                set("wisp_of_smoke_fire_tile", tile)
+            }
+        }
+
+        timerStop("firemaking") {
+            val fireTile: Tile? = this["wisp_of_smoke_fire_tile"]
+            if (fireTile != null) {
+                if (GameObjects.findOrNull(fireTile) { obj -> obj.id.startsWith("fire") } != null) {
+                    set("willow_the_wisp_of_smoke_task", true)
+                }
+                clear("wisp_of_smoke_fire_tile")
             }
         }
     }
