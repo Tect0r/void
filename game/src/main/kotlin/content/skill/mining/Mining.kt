@@ -11,6 +11,7 @@ import world.gregs.voidps.engine.client.ui.chat.plural
 import world.gregs.voidps.engine.client.variable.remaining
 import world.gregs.voidps.engine.client.variable.start
 import world.gregs.voidps.engine.client.variable.stop
+import world.gregs.voidps.engine.data.config.RowDefinition
 import world.gregs.voidps.engine.data.definition.Rows
 import world.gregs.voidps.engine.data.definition.Tables
 import world.gregs.voidps.engine.entity.World
@@ -25,6 +26,7 @@ import world.gregs.voidps.engine.entity.character.player.skill.level.Level.succe
 import world.gregs.voidps.engine.entity.item.floor.FloorItems
 import world.gregs.voidps.engine.entity.obj.GameObject
 import world.gregs.voidps.engine.entity.obj.GameObjects
+import world.gregs.voidps.engine.entity.obj.ResourceRespawn
 import world.gregs.voidps.engine.inv.addToLimit
 import world.gregs.voidps.engine.inv.inventory
 import world.gregs.voidps.engine.suspend.awaitDialogues
@@ -117,7 +119,7 @@ class Mining : Script {
                         if (added > 0) {
                             exp(Skill.Mining, xp * added)
                         }
-                        if (added < 1 || deplete(target, ore.int("life"))) {
+                        if (added < 1 || deplete(target, ore)) {
                             clearAnim()
                             break
                         }
@@ -159,7 +161,10 @@ class Mining : Script {
             val totalStarDust = player.inventory.count(ore) + player.bank.count(ore)
             if (totalStarDust >= 200) {
                 player.message("You have the maximum amount of stardust but was still rewarded experience.")
-                return -1
+                // Still count as a successful mine so the star depletes and experience is awarded,
+                // even though the dust can't be carried. Returning <1 here would skip deplete() and
+                // let totalCollected grow unbounded (negative "% left of this layer").
+                return 1
             }
         }
         var amount = when (target.id) {
@@ -198,7 +203,7 @@ class Mining : Script {
         }
     }
 
-    fun deplete(obj: GameObject, life: Int): Boolean {
+    fun deplete(obj: GameObject, ore: RowDefinition): Boolean {
         if (obj.id.startsWith("crashed_star_tier_")) {
             ShootingStarHandler.handleMinedStarDust(obj)
             return false
@@ -206,10 +211,12 @@ class Mining : Script {
         if (obj.id.startsWith("mineral_deposit_")) {
             return false
         }
-        if (life >= 0) {
-            GameObjects.replace(obj, "depleted${obj.id.dropWhile { it != '_' }}", ticks = life)
-            return true
+        val life = ore.int("life")
+        if (life < 0) {
+            return false
         }
-        return false
+        val ticks = if (ore.rowId == "clay") life else ResourceRespawn.ticks(life) // Clay always respawns in 2 ticks regardless of players
+        GameObjects.replace(obj, "depleted${obj.id.dropWhile { it != '_' }}", ticks = ticks)
+        return true
     }
 }
