@@ -48,6 +48,7 @@ class Emotes : Script {
             if (componentId.index > 23 && !unlocked(id, it.option)) {
                 return@interfaceOption
             }
+            trackStrongholdEmotes(id)
             strongQueue("emote") {
                 when (id) {
                     "skillcape" -> {
@@ -80,6 +81,28 @@ class Emotes : Script {
 
         slotChanged("worn_equipment", EquipSlot.Cape) {
             set("unlocked_emote_skillcape", it.item.def.contains(Params.SKILLCAPE_SKILL) || it.item.id == "quest_point_cape")
+        }
+    }
+
+    /**
+     * Unlocking Your Emotions (Varrock Medium) - Perform the four Stronghold of
+     * Security emotes. Each one is recorded the first time it is performed; once
+     * all four have been, the task is completed.
+     */
+    private fun Player.trackStrongholdEmotes(id: String) {
+        if (id != "flap" && id != "slap_head" && id != "idea" && id != "stomp") {
+            return
+        }
+        if (get("unlocking_your_emotions_task", false)) {
+            return
+        }
+        set("performed_emote_$id", true)
+        if (get("performed_emote_flap", false) &&
+            get("performed_emote_slap_head", false) &&
+            get("performed_emote_idea", false) &&
+            get("performed_emote_stomp", false)
+        ) {
+            set("unlocking_your_emotions_task", true)
         }
     }
 

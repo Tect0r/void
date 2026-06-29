@@ -196,3 +196,21 @@ format = "boolean"
 [equip_crossbow]
 persist = true
 format = "boolean"
+
+# Unlocking Your Emotions (Varrock Medium) - tracks which Stronghold of
+# Security emotes the player has performed.
+[performed_emote_flap]
+persist = true
+format = "boolean"
+
+[performed_emote_slap_head]
+persist = true
+format = "boolean"
+
+[performed_emote_idea]
+persist = true
+format = "boolean"
+
+[performed_emote_stomp]
+persist = true
+format = "boolean"

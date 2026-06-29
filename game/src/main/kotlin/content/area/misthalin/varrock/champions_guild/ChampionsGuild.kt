@@ -17,6 +17,10 @@ class ChampionsGuild : Script {
             }
             val entered = tile.y >= 3363
             enterDoor(target)
+            // Champion! - Enter the Champions' Guild. Reaching here means the door
+            // opened with the 32 QP requirement met; you can only leave once you
+            // have entered, so passing through in either direction qualifies.
+            set("champion_task", true)
             if (entered) {
                 npc<Neutral>("guildmaster", "Greetings bold adventurer. Welcome to the guild of Champions.")
             }
