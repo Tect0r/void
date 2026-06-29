@@ -92,6 +92,10 @@ class FarmingPatchPick : Script {
                 message("You have run out of inventory space.", ChatType.Filter)
                 return@weakQueue
             }
+            // Burning Bush - Pick poison ivy from your bush Farming patch in Varrock.
+            if (item.id == "poison_ivy_berries" && obj.id == "farming_bush_patch_varrock" && !get("burning_bush_task", false)) {
+                set("burning_bush_task", true)
+            }
             if (tree) {
                 message("You pick ${item.id.an()} ${item.def.name.lowercase()}.", ChatType.Filter)
             }

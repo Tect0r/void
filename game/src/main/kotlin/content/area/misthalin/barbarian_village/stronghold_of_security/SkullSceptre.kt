@@ -38,6 +38,8 @@ class SkullSceptre : Script {
                     logger.warn { "Failed to discharge skull sceptre for $this" }
                     return@teleportTakeOff false
                 }
+                // Intersceptre - Use the skull sceptre to teleport to Barbarian Village.
+                set("intersceptre_task", true)
                 return@teleportTakeOff true
             }
             val index = inventory.indexOf("skull_sceptre")
@@ -49,6 +51,8 @@ class SkullSceptre : Script {
                 logger.warn { "Failed to discharge skull sceptre for $this" }
                 return@teleportTakeOff false
             }
+            // Intersceptre - Use the skull sceptre to teleport to Barbarian Village.
+            set("intersceptre_task", true)
             return@teleportTakeOff true
         }
 

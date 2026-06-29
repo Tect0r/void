@@ -35,6 +35,8 @@ class Pipes : Script {
                 return@objectOperate
             }
             squeezeThroughHorizontal(target, 3149, 3152, 3155, 10.0)
+            // But It Won't Warp You Anywhere - Use the pipe shortcut in Varrock Sewers near the moss giants.
+            set("but_it_wont_warp_you_anywhere_task", true)
         }
     }
 
