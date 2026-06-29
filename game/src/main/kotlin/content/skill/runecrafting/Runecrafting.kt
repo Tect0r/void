@@ -113,9 +113,9 @@ class Runecrafting : Script {
         val pure = rune.bool("pure_essence") || !player.inventory.contains("rune_essence")
         val essenceId = if (pure) "pure_essence" else "rune_essence"
         val essence = player.inventory.count(essenceId)
+        val count = multiplier(player, rune.intListOrNull("multipliers"))
         player.inventory.transaction {
             remove(essenceId, essence)
-            val count = multiplier(player, rune.intListOrNull("multipliers"))
             add(id, essence * count)
         }
         player.start("movement_delay", 3)
@@ -129,6 +129,10 @@ class Runecrafting : Script {
                 player.gfx("bind_runes")
                 player.sound("bind_runes")
                 player.message("You bind the temple's power into ${id.toSentenceCase().plural()}.", ChatType.Filter)
+                // Varrock elite: A Ton of Earth — craft 100 or more earth runes simultaneously
+                if (id == "earth_rune" && essence * count >= 100) {
+                    player.set("a_ton_of_earth_task", true)
+                }
             }
             else -> logger.warn { "Error binding runes $player $id ${player.levels.get(Skill.Runecrafting)} $essence" }
         }

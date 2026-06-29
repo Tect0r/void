@@ -106,6 +106,10 @@ class Cooking : Script {
             if (failedToReplace(row, item, Level.success(level, chance))) {
                 return@weakQueue
             }
+            // Varrock elite: Red, Red Pies of Summer — bake a summer pie in the Cooking Guild
+            if (obj.id == "cooking_range_varrock" && row.item("cooked") == "summer_pie") {
+                set("red_red_pies_of_summer_task", true)
+            }
             if (leftover != null && !inventory.add(leftover)) {
                 return@weakQueue
             }
