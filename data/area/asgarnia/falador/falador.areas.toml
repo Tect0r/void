@@ -9,6 +9,11 @@ y = [3264, 3391]
 tags = ["penguin_area"]
 hint = "in or around Falador."
 
+[falador_park]
+x = [2984, 3016]
+y = [3372, 3392]
+level = 0
+
 [chaos_temple_multi_area]
 x = [2928, 2943]
 y = [3512, 3519]

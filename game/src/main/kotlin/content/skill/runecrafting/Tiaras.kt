@@ -45,6 +45,10 @@ class Tiaras : Script {
                 player.anim("bind_runes")
                 player.gfx("bind_runes")
                 player.sound("bind_runes")
+                // Making My Mind Up - Make a mind tiara.
+                if (id == "mind_tiara") {
+                    player["making_my_mind_up_task"] = true
+                }
             }
             else -> logger.warn { "Error binding talisman with tiara $player $id ${player.levels.get(Skill.Runecrafting)} $talismanId" }
         }

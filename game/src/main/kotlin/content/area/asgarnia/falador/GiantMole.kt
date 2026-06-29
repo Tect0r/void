@@ -82,6 +82,8 @@ class GiantMole : Script {
         }
 
         entered("giant_mole_lair") {
+            // Sniffing Out the Mole - Enter the mole's lair under Falador Park.
+            set("sniffing_out_the_mole_task", true)
             if (!hasLightSource(this)) {
                 open("level_three_darkness")
             }

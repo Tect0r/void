@@ -115,6 +115,8 @@ class BarmaidsRisingSunInn : Script {
             is TransactionError.Full -> inventoryFull()
             TransactionError.None -> {
                 message("You buy a ${ItemDefinitions.get(beer).name}.")
+                // The Good Stuff - Buy a stat-boosting beer from a waitress in the Rising Sun tavern.
+                set("the_good_stuff_task", true)
                 player<Neutral>("Thanks, Emily.")
             }
             else -> {}

@@ -114,6 +114,8 @@ class MonkOfEntrana : Script {
 
     private suspend fun Player.travel() {
         boatTravel("port_sarim_to_entrana", 14, Tile(2834, 3331, 1))
+        // Disarm and Embark - Take the boat to Entrana.
+        set("disarm_and_embark_task", true)
         statement("The ship arrives at Entrana.")
     }
 
